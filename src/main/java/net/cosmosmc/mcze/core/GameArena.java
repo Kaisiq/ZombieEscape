@@ -129,11 +129,18 @@ public class GameArena {
         this.PLUGIN = plugin;
         VOTE_MANAGER = new VoteManager();
 
-        File[] arenas = new File(plugin.getConfiguration().getSettingsConfig().getString("ArenasPath")).listFiles();
+        String arenasPath = plugin.getConfiguration().getSettingsConfig().getString("ArenasPath");
+        File arenasDirectory = new File(arenasPath);
 
-        if (arenas != null) {
-            for (File arenaFile : arenas) {
-                VOTE_MANAGER.addMap(arenaFile.getName().split(".yml")[0]);
+        if (arenasDirectory.exists() && arenasDirectory.isDirectory()) {
+            File[] arenas = arenasDirectory.listFiles();
+
+            if (arenas != null) {
+                for (File arenaFile : arenas) {
+                    if (arenaFile.isFile() && arenaFile.getName().endsWith(".yml")) {
+                        VOTE_MANAGER.addMap(arenaFile.getName().split(".yml")[0]);
+                    }
+                }
             }
         }
     }

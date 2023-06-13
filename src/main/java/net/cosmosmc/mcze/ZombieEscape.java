@@ -49,6 +49,14 @@ public class ZombieEscape extends JavaPlugin {
 
     @Override
     public void onEnable() {
+
+        if (!Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+            getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
+            getLogger().severe("*** This plugin will be disabled. ***");
+            this.setEnabled(false);
+            return;
+        }
+
         configuration = new Configuration(this);
         configuration.setupHikari(hikari, configuration.getSettingsConfig());
 

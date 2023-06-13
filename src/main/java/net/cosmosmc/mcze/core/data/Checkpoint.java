@@ -1,9 +1,11 @@
 package net.cosmosmc.mcze.core.data;
 
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+//import com.gmail.filoghost.holographicdisplays.api.Hologram;
+//import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import lombok.Getter;
 import lombok.Setter;
+import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
+import me.filoghost.holographicdisplays.api.hologram.Hologram;
 import net.cosmosmc.mcze.utils.Utils;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -15,6 +17,7 @@ public class Checkpoint {
     private int id;
     private boolean activated;
     private Location location;
+    private HolographicDisplaysAPI HologramsAPI;
     private Hologram hologram;
 
     /**
@@ -26,12 +29,13 @@ public class Checkpoint {
     public void create(Plugin plugin) {
         activated = false;
         if (hologram == null) {
-            hologram = HologramsAPI.createHologram(plugin, location);
-            hologram.appendTextLine(Utils.color("&a&lCHECKPOINT #" + id));
-            hologram.appendTextLine(Utils.color("Not Active"));
+            HologramsAPI = HolographicDisplaysAPI.get(plugin);
+            hologram = HologramsAPI.createHologram(location);
+            hologram.getLines().appendText(Utils.color("&a&lCHECKPOINT #" + id));
+            hologram.getLines().appendText(Utils.color("Not Active"));
         } else {
-            hologram.removeLine(1);
-            hologram.appendTextLine("Not Active");
+            hologram.getLines().remove(1);
+            hologram.getLines().appendText("Not Active");
         }
     }
 
@@ -41,8 +45,8 @@ public class Checkpoint {
      */
     public void activate() {
         activated = true;
-        hologram.removeLine(1);
-        hologram.appendTextLine(Utils.color("&fACTIVATED"));
+        hologram.getLines().remove(1);
+        hologram.getLines().appendText(Utils.color("&fACTIVATED"));
     }
 
 }

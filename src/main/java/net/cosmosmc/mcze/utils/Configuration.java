@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import sun.dc.pr.PRError;
+//import sun.dc.pr.PRError;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,26 +18,30 @@ import java.sql.SQLException;
 public class Configuration {
 
     private final File SETTINGS_FILE;
-    private final YamlConfiguration SETTINGS_CONFIG;
+    private YamlConfiguration SETTINGS_CONFIG;
 
     public Configuration(ZombieEscape instance) {
-        this.SETTINGS_FILE = new File(instance.getDataFolder(), "Settings.yml");
-        this.SETTINGS_CONFIG = YamlConfiguration.loadConfiguration(SETTINGS_FILE);
+        this.SETTINGS_FILE = new File(instance.getDataFolder(), "Config.yml");
 
-        if (!SETTINGS_CONFIG.isConfigurationSection("Database")) {
-            SETTINGS_CONFIG.set("Database.Address", "localhost:3306");
-            SETTINGS_CONFIG.set("Database.Schema", "example");
-            SETTINGS_CONFIG.set("Database.Username", "root");
-            SETTINGS_CONFIG.set("Database.Password", "root");
-            saveSettingsConfig();
+        if (!SETTINGS_FILE.exists()) {
+            createDefaultConfig();
         }
+
+        this.SETTINGS_CONFIG = YamlConfiguration.loadConfiguration(SETTINGS_FILE);
+        initializeDefaultSettings();
     }
 
-    public YamlConfiguration getSettingsConfig() {
-        return SETTINGS_CONFIG;
-    }
+    private void createDefaultConfig() {
+        SETTINGS_CONFIG = new YamlConfiguration();
 
-    public void saveSettingsConfig() {
+        SETTINGS_CONFIG.set("Database.Address", "localhost:3306");
+        SETTINGS_CONFIG.set("Database.Schema", "example");
+        SETTINGS_CONFIG.set("Database.Username", "root");
+        SETTINGS_CONFIG.set("Database.Password", "root");
+        SETTINGS_CONFIG.set("MapsPath", "/my/path/Maps");
+        SETTINGS_CONFIG.set("ArenasPath", "/my/path/Arenas");
+        SETTINGS_CONFIG.set("Spawn", "spawn 1495.5 74.0 -985.5 1.5 -2.7");
+
         try {
             SETTINGS_CONFIG.save(SETTINGS_FILE);
         } catch (IOException e) {
@@ -45,14 +49,50 @@ public class Configuration {
         }
     }
 
+    private void initializeDefaultSettings() {
+        if (!SETTINGS_CONFIG.isSet("Database")) {
+            SETTINGS_CONFIG.set("Database.Address", "localhost:3306");
+            SETTINGS_CONFIG.set("Database.Schema", "example");
+            SETTINGS_CONFIG.set("Database.Username", "root");
+            SETTINGS_CONFIG.set("Database.Password", "root");
+        }
+
+        if (!SETTINGS_CONFIG.isSet("MapsPath")) {
+            SETTINGS_CONFIG.set("MapsPath", "/my/path/Maps");
+        }
+
+        if (!SETTINGS_CONFIG.isSet("ArenasPath")) {
+            SETTINGS_CONFIG.set("ArenasPath", "/my/path/Arenas");
+        }
+
+        if (!SETTINGS_CONFIG.isSet("Spawn")) {
+            SETTINGS_CONFIG.set("Spawn", "spawn 1495.5 74.0 -985.5 1.5 -2.7");
+        }
+
+        saveSettingsConfig();
+    }
+
+    private void saveSettingsConfig() {
+        try {
+            SETTINGS_CONFIG.save(SETTINGS_FILE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public YamlConfiguration getSettingsConfig() {
+        return SETTINGS_CONFIG;
+    }
+
+
     public void setSpawn(Player player) {
         SETTINGS_CONFIG.set("Spawn", serializeLocation(player.getLocation()));
     }
 
     public Location getSpawn() {
         String[] parts = SETTINGS_CONFIG.getString("Spawn").split(" ");
-        return new Location(Bukkit.getWorlds().get(0), Double.valueOf(parts[0]), Double.valueOf(parts[1]),
-                Double.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4]));
+        return new Location(Bukkit.getWorlds().get(0), Double.valueOf(parts[1]), Double.valueOf(parts[2]),
+                Double.valueOf(parts[3]), Float.valueOf(parts[4]), Float.valueOf(parts[5]));
     }
 
     public String serializeLocation(Location location) {
